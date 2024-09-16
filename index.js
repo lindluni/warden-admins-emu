@@ -111,7 +111,7 @@ async function main() {
             const {data: user} = await client.users.getByUsername({
                 username: admin
             })
-            body += `- ${user.email}`
+            body += `- ${user.email}\n`
         }
         await sendComment(commentClient, issueOrg, repo, issueNumber, body)
     }
