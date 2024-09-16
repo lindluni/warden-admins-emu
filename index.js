@@ -107,6 +107,7 @@ async function main() {
     } else {
         let body = `The following users have been identified as having \`administrator\` access to https://github.com/${org}/${queryRepo}:\n\n`
         for (const admin of admins) {
+            console.log(`Retrieving email for ${admin}`)
             const {data: user} = await client.users.getByUsername({
                 username: admin
             })
