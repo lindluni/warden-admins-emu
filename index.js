@@ -29,7 +29,7 @@ async function newClient (token) {
 }
 
 async function sendComment(client, org, repo, issueNumber, body) {
-    console.log(`Sending comment to ${org}/${repo}#${issueNumber}`)
+    core.info(`Sending comment to ${org}/${repo}#${issueNumber}`)
     await client.issues.createComment({
         owner: org,
         repo: repo,
@@ -53,9 +53,24 @@ async function main() {
     const client = await newClient(adminToken)
     const commentClient = await newClient(githubToken)
 
+    try {
+        core.info(`Verifying repository ${org}/${queryRepo} exists`)
+        await client.repos.get({
+            owner: org,
+            repo: queryRepo
+        })
+    } catch (e) {
+        if(e.status === 404) {
+            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} The repository ${org}/${queryRepo} does not exist in the target organization [${org}], ensure you've provided the correct organization and repository name.`)
+            return
+        }
+        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There was an error verifying the repository ${queryRepo} exists`)
+        core.setFailed(e.message)
+    }
+
     let members
     try {
-        console.log(`Retrieving direct admins for ${org}/${queryRepo}`)
+        core.info(`Retrieving direct admins for ${org}/${queryRepo}`)
         members = await client.paginate(client.repos.listCollaborators, {
             owner: org,
             repo: queryRepo,
@@ -71,7 +86,7 @@ async function main() {
 
     let teams
     try {
-        console.log(`Retrieving teams for ${org}/${repo}`)
+        core.info(`Retrieving teams for ${org}/${repo}`)
         teams = await client.paginate(client.repos.listTeams, {
             owner: org,
             repo: queryRepo,
@@ -84,7 +99,7 @@ async function main() {
     const adminTeams = teams.filter(t => t.permission === 'admin')
     for (const team of adminTeams) {
         try {
-            console.log(`Retrieving members for ${team.name}`)
+            core.info(`Retrieving members for ${team.name}`)
             const members = await client.paginate(client.teams.listMembersInOrg, {
                 org: org,
                 team_slug: team.slug,
@@ -107,7 +122,7 @@ async function main() {
     } else {
         let body = `The following users have been identified as having \`administrator\` access to https://github.com/${org}/${queryRepo}:\n\n`
         for (const admin of admins) {
-            console.log(`Retrieving email for ${admin}`)
+            core.info(`Retrieving email for ${admin}`)
             const {data: user} = await client.users.getByUsername({
                 username: admin
             })
