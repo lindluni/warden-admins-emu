@@ -61,10 +61,10 @@ async function main() {
         })
     } catch (e) {
         if(e.status === 404) {
-            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} The repository ${org}/${queryRepo} does not exist in the target organization [${org}], ensure you've provided the correct organization and repository name.`)
+            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the direct admins for \`${repo}\`:\n\n\`\`\`The repository \`${org}/${queryRepo}\` does not exist in the target organization [\`${org}\`], ensure you've provided the correct organization and repository name.\`\`\``)
             return
         }
-        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There was an error verifying the repository ${queryRepo} exists`)
+        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error verifying the repository ${queryRepo} exists:\n\n\`\`\`${e.message}\`\`\``)
         core.setFailed(e.message)
     }
 
@@ -78,7 +78,7 @@ async function main() {
             per_page: 100
         })
     } catch (e) {
-        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There was an error retrieving the direct admins for ${repo}: ${e.message}`)
+        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the direct admins for \`${org}/${repo}\`:\n\n\`\`\`${e.message}\`\`\``)
         core.setFailed(e.message)
     }
 
@@ -92,7 +92,7 @@ async function main() {
             repo: queryRepo,
         })
     } catch (e) {
-        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There was an error retrieving the teams for ${repo}: ${e.message}`)
+        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the teams for \`${org}/${repo}\`:\n\n\`\`\`${e.message}\`\`\``)
         core.setFailed(e.message)
     }
 
@@ -111,13 +111,13 @@ async function main() {
                 }
             }
         } catch (e) {
-            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There was an error retrieving the members for ${team.name}: ${e.message}`)
+            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the members for ${team.name}:\n\n\`\`\`${e.message}\`\`\``)
             core.setFailed(e.message)
         }
     }
 
     if(admins.length === 0) {
-        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor} There are no admins for ${queryRepo}`)
+        await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere are no admins for ${queryRepo}`)
         core.setFailed(`There are no admins for ${queryRepo}`)
     } else {
         let body = `The following users have been identified as having \`administrator\` access to https://github.com/${org}/${queryRepo}:\n\n`
