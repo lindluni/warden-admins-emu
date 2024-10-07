@@ -61,7 +61,7 @@ async function main() {
         })
     } catch (e) {
         if(e.status === 404) {
-            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the direct admins for \`${repo}\`:\n\nThe repository \`${org}/${queryRepo}\` does not exist in the target organization [\`${org}\`], ensure you've provided the correct organization and repository name.`)
+            await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error retrieving the direct admins for \`${repo}\`:\n\nThe repository \`${org}/${queryRepo}\` does not exist in the target organization \`${org}\`.\n\nEnsure you've provided the correct organization and repository name.`)
             return
         }
         await sendComment(commentClient, issueOrg, repo, issueNumber,`@${actor}\n\nThere was an error verifying the repository ${queryRepo} exists:\n\n${e.message}`)
